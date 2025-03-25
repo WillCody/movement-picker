@@ -18,23 +18,36 @@
     }
 
     button {
-      display: block;
-      margin: 2em auto;
+      display: inline-block;
+      margin: 1em 0.5em;
       padding: 1em 2em;
-      font-size: 1.2em;
-      background-color: #0077cc;
-      color: white;
+      font-size: 1.1em;
       border: none;
       border-radius: 8px;
       cursor: pointer;
     }
 
     button:hover {
-      background-color: #005fa3;
+      opacity: 0.9;
+    }
+
+    .main-button {
+      background-color: #0077cc;
+      color: white;
+    }
+
+    .done-button {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .reset-button {
+      background-color: #dc3545;
+      color: white;
     }
 
     #result {
-      margin-top: 3em;
+      margin-top: 2em;
       font-size: 2em;
       font-weight: bold;
       text-align: center;
@@ -43,6 +56,12 @@
       border: 1px solid #b2ebf2;
       border-radius: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    #streak-display {
+      text-align: center;
+      font-size: 1.2em;
+      margin-top: 1em;
     }
 
     .category {
@@ -72,14 +91,23 @@
     }
   </style>
 </head>
-<body onload="pickMovement()">
+<body onload="initializePage()">
 
   <h1>🎯 1-Minute Movement Picker</h1>
+
+  <div id="streak-display">
+    🔥 Current Streak: <span id="streak-count">0</span> day(s)
+  </div>
+
   <p style="text-align:center;">Here’s your movement for today — or tap the button to choose again.</p>
 
   <div id="result">Loading...</div>
 
-  <button onclick="pickMovement()">Choose Another Movement</button>
+  <div style="text-align:center;">
+    <button class="main-button" onclick="pickMovement()">🎲 Choose Another Movement</button>
+    <button class="done-button" onclick="markAsDone()">✅ I did it</button>
+    <button class="reset-button" onclick="resetStreak()">⛔ Reset Streak</button>
+  </div>
 
   <div class="category">
     <h2>📋 All Movement Options</h2>
@@ -137,12 +165,10 @@
         <li>Do a short Les Mills or boxing workout</li>
       </ul>
     </div>
-
   </div>
 
   <script>
     const movements = [
-      // Strength & Activation
       "Wall push-ups (or regular push-ups)",
       "Standing calf raises",
       "Chair tricep dips",
@@ -151,36 +177,51 @@
       "10 push-ups + 10 sit-ups",
       "Stretch with a timer",
       "Walk up and down the stairs",
-
-      // Mobility & Stretching
       "Cat-cow stretches",
       "Torso twists while standing",
       "Forward fold + side stretches",
       "Shoulder rolls and arm circles",
       "Dynamic hamstring stretch",
-
-      // Practical Movement
       "Walking tidy",
       "Do a 1-minute reset for a messy area",
       "Put something away in each room",
       "Carry laundry upstairs one item at a time",
-
-      // Outdoor
       "Walk around the estate",
       "Walk into town",
       "Visit the ducks",
       "Do some gardening",
-
-      // Tech-Assisted
       "Play a movement game in VR",
       "Follow a 1-minute YouTube fitness clip or playlist",
       "Do a short Les Mills or boxing workout"
     ];
 
+    function initializePage() {
+      loadStreak();
+      pickMovement();
+    }
+
     function pickMovement() {
       const choice = movements[Math.floor(Math.random() * movements.length)];
       document.getElementById("result").textContent = choice;
     }
+
+    function loadStreak() {
+      const streak = parseInt(localStorage.getItem("movementStreak")) || 0;
+      document.getElementById("streak-count").textContent = streak;
+    }
+
+    function markAsDone() {
+      let streak = parseInt(localStorage.getItem("movementStreak")) || 0;
+      streak++;
+      localStorage.setItem("movementStreak", streak);
+      document.getElementById("streak-count").textContent = streak;
+    }
+
+    function resetStreak() {
+      localStorage.setItem("movementStreak", 0);
+      document.getElementById("streak-count").textContent = 0;
+    }
   </script>
+
 </body>
 </html>
