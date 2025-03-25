@@ -34,18 +34,19 @@
     }
 
     #result {
-      margin-top: 2em;
-      font-size: 1.5em;
+      margin-top: 3em;
+      font-size: 2em;
       font-weight: bold;
       text-align: center;
-      padding: 1em;
+      padding: 1.5em;
       background: #e0f7fa;
       border: 1px solid #b2ebf2;
-      border-radius: 8px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
     .category {
-      margin-top: 2em;
+      margin-top: 3em;
     }
 
     .category h3 {
@@ -63,17 +64,22 @@
       body {
         padding: 1em;
       }
+
+      #result {
+        font-size: 1.5em;
+        padding: 1em;
+      }
     }
   </style>
 </head>
-<body>
+<body onload="pickMovement()">
 
   <h1>🎯 1-Minute Movement Picker</h1>
-  <p style="text-align:center;">Click the button below to get a quick movement suggestion — cast a small vote for your fitness identity!</p>
+  <p style="text-align:center;">Here’s your movement for today — or tap the button to choose again.</p>
 
-  <button onclick="pickMovement()">Choose Movement</button>
+  <div id="result">Loading...</div>
 
-  <div id="result">Your movement will appear here.</div>
+  <button onclick="pickMovement()">Choose Another Movement</button>
 
   <div class="category">
     <h2>📋 All Movement Options</h2>
