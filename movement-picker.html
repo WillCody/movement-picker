@@ -143,13 +143,17 @@
   </div>
 
   <div class="category" style="margin-top: 3em;">
-    <h2>🕓 Last 20 Completed Movements</h2>
+    <h2>🕓 Last Completed Movements</h2>
     <ul id="history-list" style="font-size: 0.95em;"></ul>
+    <div style="text-align:center; margin-top: 1em;">
+      <button class="main-button" onclick="toggleHistory()" id="toggle-history">🔽 Show More</button>
+      <button class="reset-button" onclick="clearHistory()">🧼 Clear History</button>
+      <button class="main-button" onclick="downloadHistory()">📁 Download CSV</button>
+    </div>
   </div>
 
   <div class="category" style="margin-top: 8em;">
     <h2>📋 All Movement Options</h2>
-
     <div class="category">
       <h3>💪 Strength & Activation</h3>
       <ul>
@@ -163,7 +167,6 @@
         <li>Walk up and down the stairs</li>
       </ul>
     </div>
-
     <div class="category">
       <h3>🤸 Mobility & Stretching</h3>
       <ul>
@@ -174,7 +177,6 @@
         <li>Dynamic hamstring stretch (touch toes, reach arms up)</li>
       </ul>
     </div>
-
     <div class="category">
       <h3>🌿 Practical Movement (Active Living)</h3>
       <ul>
@@ -184,7 +186,6 @@
         <li>Carry laundry upstairs one item at a time</li>
       </ul>
     </div>
-
     <div class="category">
       <h3>🌳 Outdoor Movement</h3>
       <ul>
@@ -194,7 +195,6 @@
         <li>Do some gardening</li>
       </ul>
     </div>
-
     <div class="category">
       <h3>🕹️ Tech-Assisted or Digital Movement</h3>
       <ul>
@@ -233,6 +233,8 @@
       "Do a short Les Mills or boxing workout"
     ];
 
+    let isHistoryExpanded = false;
+
     function initializePage() {
       loadStreak();
       loadHistory();
@@ -256,24 +258,35 @@
     }
 
     function markAsDone() {
-      // Update streak
       let streak = parseInt(localStorage.getItem("movementStreak")) || 0;
       streak++;
       localStorage.setItem("movementStreak", streak);
       document.getElementById("streak-count").textContent = streak;
 
-      // Update history
       const movement = document.getElementById("result").textContent;
+      const date = new Date().toLocaleDateString(undefined, {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+
       let history = JSON.parse(localStorage.getItem("movementHistory")) || [];
-      history.unshift(movement);
-      if (history.length > 20) history = history.slice(0, 20);
+      history.unshift({ movement, date });
+      if (history.length > 200) history = history.slice(0, 200);
       localStorage.setItem("movementHistory", JSON.stringify(history));
       renderHistory(history);
     }
 
-    function resetStreak() {
-      localStorage.setItem("movementStreak", 0);
-      document.getElementById("streak-count").textContent = 0;
+    function clearHistory() {
+      localStorage.removeItem("movementHistory");
+      renderHistory([]);
+    }
+
+    function toggleHistory() {
+      isHistoryExpanded = !isHistoryExpanded;
+      loadHistory();
+      const btn = document.getElementById("toggle-history");
+      btn.textContent = isHistoryExpanded ? "🔼 Show Less" : "🔽 Show More";
     }
 
     function loadHistory() {
@@ -284,11 +297,33 @@
     function renderHistory(historyArray) {
       const list = document.getElementById("history-list");
       list.innerHTML = "";
-      historyArray.forEach(item => {
+
+      const toShow = isHistoryExpanded ? historyArray : historyArray.slice(0, 5);
+      toShow.forEach(entry => {
         const li = document.createElement("li");
-        li.textContent = item;
+        li.textContent = `${entry.movement} — ${entry.date}`;
         list.appendChild(li);
       });
+    }
+
+    function downloadHistory() {
+      const history = JSON.parse(localStorage.getItem("movementHistory")) || [];
+      if (!history.length) return alert("No history to download!");
+
+      const csvRows = ["Activity,Date"];
+      history.forEach(entry => {
+        csvRows.push(`"${entry.movement.replace(/"/g, '""')}","${entry.date}"`);
+      });
+
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "movement-history.csv";
+      link.click();
+
+      URL.revokeObjectURL(url);
     }
   </script>
 
