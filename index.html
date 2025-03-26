@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>1-Minute Movement Picker</title>
+  <style>
+    :root {
+      --bg: #f9f9f9;
+      --text: #333;
+      --accent: #0077cc;
+      --lightbox: #e0f7fa;
+      --lightbox-border: #b2ebf2;
+      --success: #28a745;
+      --danger: #dc3545;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121212;
+        --text: #eee;
+        --accent: #3399ff;
+        --lightbox: #1f2d35;
+        --lightbox-border: #2a4d59;
+        --success: #34c759;
+        --danger: #ff3b30;
+      }
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 2em;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    button {
+      display: inline-block;
+      margin: 1em 0.5em;
+      padding: 1em 2em;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .main-button {
+      background-color: var(--accent);
+    }
+
+    .done-button {
+      background-color: var(--success);
+    }
+
+    .reset-button {
+      background-color: var(--danger);
+    }
+
+    #result {
+      margin-top: 2em;
+      font-size: 2em;
+      font-weight: bold;
+      text-align: center;
+      padding: 1.5em;
+      background: var(--lightbox);
+      border: 1px solid var(--lightbox-border);
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    #streak-display {
+      text-align: center;
+      font-size: 1.2em;
+      margin-top: 1em;
+    }
+
+    #streak-count {
+      font-size: 2em;
+      font-weight: bold;
+      margin-top: 0.3em;
+    }
+
+    .category {
+      margin-top: 3em;
+    }
+
+    .category h3 {
+      background-color: #eee;
+      padding: 0.5em;
+      border-left: 4px solid var(--accent);
+    }
+
+    ul {
+      list-style: disc;
+      padding-left: 1.5em;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .category h3 {
+        background-color: #1e1e1e;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1em;
+      }
+
+      #result {
+        font-size: 1.5em;
+        padding: 1em;
+      }
+    }
+  </style>
+</head>
+<body onload="initializePage()">
+
+  <h1>🎯 1-Minute Movement Picker</h1>
+
+  <div id="streak-display">
+    🔥 Current Streak:
+    <div id="streak-count">0</div>
+  </div>
+
+  <p style="text-align:center;">Here’s your movement — or tap the button to choose again.</p>
+
+  <div id="result">Loading...</div>
+
+  <div style="text-align:center;">
+    <button class="main-button" onclick="pickMovement()">🎲 Choose Another Movement</button>
+    <button class="done-button" onclick="markAsDone()">✅ I did it</button>
+    <button class="reset-button" onclick="resetStreak()">⛔ Reset Streak</button>
+  </div>
+
+  <div class="category" style="margin-top: 3em;">
+    <h2>🕓 Last Completed Movements</h2>
+    <ul id="history-list" style="font-size: 0.95em;"></ul>
+    <div style="text-align:center; margin-top: 1em;">
+      <button class="main-button" onclick="toggleHistory()" id="toggle-history">🔽 Show More</button>
+      <button class="reset-button" onclick="clearHistory()">🧼 Clear History</button>
+      <button class="main-button" onclick="downloadHistory()">📁 Download CSV</button>
+    </div>
+  </div>
+
+  <div class="category" style="margin-top: 8em;">
+    <h2>📋 All Movement Options</h2>
+    <div class="category">
+      <h3>💪 Strength & Activation</h3>
+      <ul>
+        <li>Wall push-ups (or regular push-ups)</li>
+        <li>Standing calf raises</li>
+        <li>Chair tricep dips</li>
+        <li>Standing leg swings (side to side or front to back)</li>
+        <li>March on the spot while tidying dishes</li>
+        <li>10 push-ups + 10 sit-ups</li>
+        <li>Stretch with a timer</li>
+        <li>Walk up and down the stairs</li>
+      </ul>
+    </div>
+    <div class="category">
+      <h3>🤸 Mobility & Stretching</h3>
+      <ul>
+        <li>Cat-cow stretches</li>
+        <li>Torso twists while standing</li>
+        <li>Forward fold + side stretches</li>
+        <li>Shoulder rolls and arm circles</li>
+        <li>Dynamic hamstring stretch (touch toes, reach arms up)</li>
+      </ul>
+    </div>
+    <div class="category">
+      <h3>🌿 Practical Movement (Active Living)</h3>
+      <ul>
+        <li>“Walking tidy” — move around and pick up a few things while being active</li>
+        <li>Do a "1-minute reset" for a messy area</li>
+        <li>Put something away in each room — move mindfully between them</li>
+        <li>Carry laundry upstairs one item at a time</li>
+      </ul>
+    </div>
+    <div class="category">
+      <h3>🌳 Outdoor Movement</h3>
+      <ul>
+        <li>Walk around the estate</li>
+        <li>Walk into town</li>
+        <li>Visit the ducks</li>
+        <li>Do some gardening</li>
+      </ul>
+    </div>
+    <div class="category">
+      <h3>🕹️ Tech-Assisted or Digital Movement</h3>
+      <ul>
+        <li>Play a movement game in VR</li>
+        <li>Follow a 1-minute YouTube fitness clip or playlist</li>
+        <li>Do a short Les Mills or boxing workout</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const movements = [
+      "Wall push-ups (or regular push-ups)",
+      "Standing calf raises",
+      "Chair tricep dips",
+      "Standing leg swings",
+      "March on the spot while tidying dishes",
+      "10 push-ups + 10 sit-ups",
+      "Stretch with a timer",
+      "Walk up and down the stairs",
+      "Cat-cow stretches",
+      "Torso twists while standing",
+      "Forward fold + side stretches",
+      "Shoulder rolls and arm circles",
+      "Dynamic hamstring stretch",
+      "Walking tidy",
+      "Do a 1-minute reset for a messy area",
+      "Put something away in each room",
+      "Carry laundry upstairs one item at a time",
+      "Walk around the estate",
+      "Walk into town",
+      "Visit the ducks",
+      "Do some gardening",
+      "Play a movement game in VR",
+      "Follow a 1-minute YouTube fitness clip or playlist",
+      "Do a short Les Mills or boxing workout"
+    ];
+
+    let isHistoryExpanded = false;
+
+    function initializePage() {
+      loadStreak();
+      loadHistory();
+      const lastChoice = localStorage.getItem("lastMovementChoice");
+      if (lastChoice && lastChoice.trim() !== "") {
+        document.getElementById("result").textContent = lastChoice;
+      } else {
+        pickMovement();
+      }
+    }
+
+    function pickMovement() {
+      const choice = movements[Math.floor(Math.random() * movements.length)];
+      document.getElementById("result").textContent = choice;
+      localStorage.setItem("lastMovementChoice", choice);
+    }
+
+    function loadStreak() {
+      const streak = parseInt(localStorage.getItem("movementStreak")) || 0;
+      document.getElementById("streak-count").textContent = streak;
+    }
+
+    function markAsDone() {
+      let streak = parseInt(localStorage.getItem("movementStreak")) || 0;
+      streak++;
+      localStorage.setItem("movementStreak", streak);
+      document.getElementById("streak-count").textContent = streak;
+
+      const movement = document.getElementById("result").textContent;
+      const date = new Date().toLocaleDateString(undefined, {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+
+      let history = JSON.parse(localStorage.getItem("movementHistory")) || [];
+      history.unshift({ movement, date });
+      if (history.length > 200) history = history.slice(0, 200);
+      localStorage.setItem("movementHistory", JSON.stringify(history));
+      renderHistory(history);
+    }
+
+    function clearHistory() {
+      localStorage.removeItem("movementHistory");
+      renderHistory([]);
+    }
+
+    function toggleHistory() {
+      isHistoryExpanded = !isHistoryExpanded;
+      loadHistory();
+      const btn = document.getElementById("toggle-history");
+      btn.textContent = isHistoryExpanded ? "🔼 Show Less" : "🔽 Show More";
+    }
+
+    function loadHistory() {
+      const history = JSON.parse(localStorage.getItem("movementHistory")) || [];
+      renderHistory(history);
+    }
+
+    function renderHistory(historyArray) {
+      const list = document.getElementById("history-list");
+      list.innerHTML = "";
+
+      const toShow = isHistoryExpanded ? historyArray : historyArray.slice(0, 5);
+      toShow.forEach(entry => {
+        const li = document.createElement("li");
+        li.textContent = `${entry.movement} — ${entry.date}`;
+        list.appendChild(li);
+      });
+    }
+
+    function downloadHistory() {
+      const history = JSON.parse(localStorage.getItem("movementHistory")) || [];
+      if (!history.length) return alert("No history to download!");
+
+      const csvRows = ["Activity,Date"];
+      history.forEach(entry => {
+        csvRows.push(`"${entry.movement.replace(/"/g, '""')}","${entry.date}"`);
+      });
+
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "movement-history.csv";
+      link.click();
+
+      URL.revokeObjectURL(url);
+    }
+  </script>
+
+</body>
+</html>
