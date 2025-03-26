@@ -1,8 +1,9 @@
 const cacheName = 'movement-picker-v1';
 const filesToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  '/movement-picker/',
+  '/movement-picker/index.html',
+  '/movement-picker/manifest.json',
+  '/movement-picker/icon-192.png'
 ];
 
 self.addEventListener('install', (e) => {
