@@ -1,4 +1,5 @@
 {
+  "id": "/movement-picker/",
   "name": "Movement Picker",
   "short_name": "Move Now",
   "start_url": ".",
@@ -7,7 +8,7 @@
   "theme_color": "#0077cc",
   "icons": [
     {
-      "src": "https://fav.farm/🕺",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     }
