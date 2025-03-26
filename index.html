@@ -300,6 +300,11 @@
       renderHistory(history);
     }
 
+    function resetStreak() {
+      localStorage.setItem("movementStreak", 0);
+      document.getElementById("streak-count").textContent = 0;
+    }
+
     function clearHistory() {
       localStorage.removeItem("movementHistory");
       renderHistory([]);
