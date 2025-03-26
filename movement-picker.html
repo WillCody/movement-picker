@@ -84,6 +84,12 @@
       margin-top: 1em;
     }
 
+    #streak-count {
+      font-size: 2em;
+      font-weight: bold;
+      margin-top: 0.3em;
+    }
+
     .category {
       margin-top: 3em;
     }
@@ -122,7 +128,8 @@
   <h1>🎯 1-Minute Movement Picker</h1>
 
   <div id="streak-display">
-    🔥 Current Streak: <span id="streak-count">0</span> time(s)
+    🔥 Current Streak:
+    <div id="streak-count">0</div>
   </div>
 
   <p style="text-align:center;">Here’s your movement — or tap the button to choose again.</p>
@@ -135,7 +142,12 @@
     <button class="reset-button" onclick="resetStreak()">⛔ Reset Streak</button>
   </div>
 
-  <div class="category">
+  <div class="category" style="margin-top: 3em;">
+    <h2>🕓 Last 20 Completed Movements</h2>
+    <ul id="history-list" style="font-size: 0.95em;"></ul>
+  </div>
+
+  <div class="category" style="margin-top: 8em;">
     <h2>📋 All Movement Options</h2>
 
     <div class="category">
@@ -223,8 +235,9 @@
 
     function initializePage() {
       loadStreak();
+      loadHistory();
       const lastChoice = localStorage.getItem("lastMovementChoice");
-      if (lastChoice) {
+      if (lastChoice && lastChoice.trim() !== "") {
         document.getElementById("result").textContent = lastChoice;
       } else {
         pickMovement();
@@ -243,15 +256,39 @@
     }
 
     function markAsDone() {
+      // Update streak
       let streak = parseInt(localStorage.getItem("movementStreak")) || 0;
       streak++;
       localStorage.setItem("movementStreak", streak);
       document.getElementById("streak-count").textContent = streak;
+
+      // Update history
+      const movement = document.getElementById("result").textContent;
+      let history = JSON.parse(localStorage.getItem("movementHistory")) || [];
+      history.unshift(movement);
+      if (history.length > 20) history = history.slice(0, 20);
+      localStorage.setItem("movementHistory", JSON.stringify(history));
+      renderHistory(history);
     }
 
     function resetStreak() {
       localStorage.setItem("movementStreak", 0);
       document.getElementById("streak-count").textContent = 0;
+    }
+
+    function loadHistory() {
+      const history = JSON.parse(localStorage.getItem("movementHistory")) || [];
+      renderHistory(history);
+    }
+
+    function renderHistory(historyArray) {
+      const list = document.getElementById("history-list");
+      list.innerHTML = "";
+      historyArray.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        list.appendChild(li);
+      });
     }
   </script>
 
