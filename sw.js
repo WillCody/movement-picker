@@ -1,4 +1,4 @@
-const cacheName = 'movement-picker-v1';
+const cacheName = 'movement-picker-v2';
 const filesToCache = [
   '/movement-picker/',
   '/movement-picker/index.html',
