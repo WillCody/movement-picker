@@ -1,18 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-Minute Movement Picker</title>
+
+  <!-- PWA manifest & theme -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0077cc">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="apple-touch-icon" href="https://fav.farm/🕺">
+  <link rel="icon" href="https://fav.farm/🕺" type="image/png">
+
+  <!-- Service worker registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
+        navigator.serviceWorker.register('sw.js').then(
+          (reg) => console.log('Service worker registered ✅', reg),
+          (err) => console.error('Service worker error ❌', err)
+        );
       });
     }
   </script>
-  <meta charset="UTF-8">
-  <title>1-Minute Movement Picker</title>
   <style>
     :root {
       --bg: #f9f9f9;
