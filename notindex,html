@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-Minute Movement Picker</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0077cc" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="icon" href="icon-192.png" type="image/png" />
+
+  <style>
+    :root {
+      --bg: #f9f9f9;
+      --text: #333;
+      --accent: #0077cc;
+      --card-bg: #ffffff;
+      --lightbox: #e0f7fa;
+      --lightbox-border: #b2ebf2;
+      --success: #28a745;
+      --danger: #dc3545;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121212;
+        --text: #eee;
+        --accent: #3399ff;
+        --card-bg: #1e1e1e;
+        --lightbox: #1f2d35;
+        --lightbox-border: #2a4d59;
+        --success: #34c759;
+        --danger: #ff3b30;
+      }
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1em;
+      display: flex;
+      flex-direction: column;
+      gap: 2em;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 1.5em;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    button {
+      margin: 0.5em;
+      padding: 0.75em 1.5em;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .main-button { background-color: var(--accent); }
+    .done-button { background-color: var(--success); }
+    .reset-button { background-color: var(--danger); }
+
+    #result {
+      margin-top: 1em;
+      font-size: 1.6em;
+      font-weight: bold;
+      text-align: center;
+      background: var(--lightbox);
+      padding: 1em;
+      border: 1px solid var(--lightbox-border);
+      border-radius: 10px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    #streak-count {
+      font-size: 2.5em;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    ul {
+      padding-left: 1.5em;
+    }
+
+    @media (max-width: 600px) {
+      .button-row {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      button {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+  </style>
+</head>
+<body onload="initializePage()">
+
+  <div class="card">
+    <h2>🔥 Current Streak:</h2>
+    <div id="streak-count">0</div>
+    <p style="text-align:center;">Here’s your movement — or tap the button to choose again.</p>
+    <div id="result">Loading...</div>
+    <div class="button-row">
+      <button class="main-button" onclick="pickMovement()">🎲 Choose Another Movement</button>
+      <button class="done-button" onclick="markAsDone()">✅ I did it</button>
+      <button class="reset-button" onclick="resetStreak()">⛔ Reset Streak</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🕓 Last Completed Movements</h2>
+    <ul id="history-list"></ul>
+    <div class="button-row">
+      <button class="main-button" onclick="toggleHistory()" id="toggle-history">🔽 Show More</button>
+      <button class="reset-button" onclick="clearHistory()">🧼 Clear History</button>
+      <button class="main-button" onclick="downloadHistory()">📁 Download CSV</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 All Movement Options</h2>
+    <p>Grouped list can be added back here if you want it always visible, or link to a page/overlay.</p>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js');
+      });
+    }
+
+    let isHistoryExpanded = false;
+
+    function initializePage() {
+      loadStreak();
+      loadHistory();
+      const lastChoice = localStorage.getItem("lastMovementChoice");
+      document.getElementById("result").textContent = lastChoice || pickMovement();
+    }
+
+    function pickMovement() {
+      const movements = [
+        "Wall push-ups", "Calf raises", "Chair dips", "Leg swings",
+        "March while tidying", "10 push-ups + 10 sit-ups", "Stretch w/ timer",
+        "Stairs walk", "Cat-cow", "Torso twists", "Forward fold + stretch",
+        "Shoulder rolls", "Hamstring stretch", "Walking tidy",
+        "1-minute reset", "Put things away", "Laundry trip",
+        "Walk estate", "Walk into town", "Visit ducks", "Gardening",
+        "VR movement", "YouTube 1-min", "Short boxing/Les Mills"
+      ];
+      const choice = movements[Math.floor(Math.random() * movements.length)];
+      localStorage.setItem("lastMovementChoice", choice);
+      document.getElementById("result").textContent = choice;
+      return choice;
+    }
+
+    function markAsDone() {
+      let streak = parseInt(localStorage.getItem("movementStreak")) || 0;
+      streak++;
+      localStorage.setItem("movementStreak", streak);
+      document.getElementById("streak-count").textContent = streak;
+
+      const movement = document.getElementById("result").textContent;
+      const date = new Date().toLocaleDateString();
+      let history = JSON.parse(localStorage.getItem("movementHistory")) || [];
+      history.unshift({ movement, date });
+      history = history.slice(0, 200);
+      localStorage.setItem("movementHistory", JSON.stringify(history));
+      renderHistory(history);
+    }
+
+    function resetStreak() {
+      localStorage.setItem("movementStreak", 0);
+      document.getElementById("streak-count").textContent = 0;
+    }
+
+    function clearHistory() {
+      localStorage.removeItem("movementHistory");
+      renderHistory([]);
+    }
+
+    function toggleHistory() {
+      isHistoryExpanded = !isHistoryExpanded;
+      loadHistory();
+      document.getElementById("toggle-history").textContent = isHistoryExpanded ? "🔼 Show Less" : "🔽 Show More";
+    }
+
+    function loadStreak() {
+      const streak = parseInt(localStorage.getItem("movementStreak")) || 0;
+      document.getElementById("streak-count").textContent = streak;
+    }
+
+    function loadHistory() {
+      const history = JSON.parse(localStorage.getItem("movementHistory")) || [];
+      renderHistory(history);
+    }
+
+    function renderHistory(historyArray) {
+      const list = document.getElementById("history-list");
+      list.innerHTML = "";
+      const toShow = isHistoryExpanded ? historyArray : historyArray.slice(0, 5);
+      toShow.forEach(entry => {
+        const li = document.createElement("li");
+        li.textContent = `${entry.movement} — ${entry.date}`;
+        list.appendChild(li);
+      });
+    }
+
+    function downloadHistory() {
+      const history = JSON.parse(localStorage.getItem("movementHistory")) || [];
+      if (!history.length) return alert("No history to download!");
+
+      const csvRows = ["Activity,Date"];
+      history.forEach(entry => {
+        csvRows.push(`"${entry.movement}","${entry.date}"`);
+      });
+
+      const blob = new Blob([csvRows.join("\\n")], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "movement-history.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
